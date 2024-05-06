@@ -1,23 +1,34 @@
 import { Car } from "./car/car";
 import { Road } from "./road";
+import { Visualizer } from "./visualizer/visualizer";
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-if (!canvas) {
+const carCanvas = document.getElementById("car-canvas") as HTMLCanvasElement;
+const networkCanvas = document.getElementById(
+	"network-canvas",
+) as HTMLCanvasElement;
+if (!carCanvas && !networkCanvas) {
 	throw new Error("Could not get canvas");
 }
-canvas.width = 200;
+carCanvas.width = 200;
+networkCanvas.width = 400;
 
-const ctx = canvas.getContext("2d");
-if (!ctx) {
+const carCtx = carCanvas.getContext("2d");
+const networkCtx = networkCanvas.getContext("2d");
+
+if (!carCtx && !networkCtx) {
 	throw new Error("Could not get 2d context");
 }
 
-const road = new Road(canvas.width / 2, canvas.width * 0.9, 3);
-const car = new Car(road.getLaneCenter(1), 100, 30, 50, "AI");
+const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, 3);
+const car = new Car(road.getLaneCenter(1), 100, 30, 50, "KEYS");
 const traffic = [new Car(road.getLaneCenter(1), -300, 30, 50, "DUMMY", 2)];
 
 function animate() {
-	if (!ctx) {
+	if (!carCtx) {
+		throw new Error("Could not get 2d context");
+	}
+
+	if (!networkCtx) {
 		throw new Error("Could not get 2d context");
 	}
 
@@ -26,19 +37,23 @@ function animate() {
 	}
 
 	car.update(road.borders, traffic);
-	canvas.height = window.innerHeight;
 
-	ctx.save();
-	ctx.translate(0, -car.y + canvas.height * 0.7);
+	carCanvas.height = window.innerHeight;
+	networkCanvas.height = window.innerHeight;
 
-	road.draw(ctx);
+	carCtx.save();
+	carCtx.translate(0, -car.y + carCanvas.height * 0.7);
+
+	road.draw(carCtx);
 	for (let i = 0; i < traffic.length; i++) {
-		traffic[i].draw(ctx, "red");
+		traffic[i].draw(carCtx, "red");
 	}
 
-	car.draw(ctx);
+	car.draw(carCtx);
 
-	ctx.restore();
+	carCtx.restore();
+
+	Visualizer.drawNetwork(networkCtx, car.brain!);
 	requestAnimationFrame(animate);
 }
 
