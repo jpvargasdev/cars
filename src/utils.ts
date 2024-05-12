@@ -47,7 +47,7 @@ export function getRGBA(value: number) {
 	return "rgba(" + R + "," + G + "," + B + "," + alpha + ")";
 }
 
-// function getRandomColor() {
-// 	const hue = 290 + Math.random() * 260;
-// 	return "hsl(" + hue + ", 100%, 60%)";
-// }
+export function getRandomColor() {
+	const hue = 290 + Math.random() * 260;
+	return "hsl(" + hue + ", 100%, 60%)";
+}

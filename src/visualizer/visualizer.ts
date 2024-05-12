@@ -9,7 +9,28 @@ export class Visualizer {
 		const width = ctx.canvas.width - margin * 2;
 		const height = ctx.canvas.height - 200;
 
-		Visualizer.drawLevel(ctx, network.levels[0], left, top, width, height);
+		const levelHeight = height / network.levels.length;
+
+		for (let i = network.levels.length - 1; i >= 0; i--) {
+			const levelTop =
+				top +
+				lerp(
+					height - levelHeight,
+					0,
+					network.levels.length === 1 ? 0.5 : i / (network.levels.length - 1),
+				);
+
+      ctx.setLineDash([10, 3])
+			Visualizer.drawLevel(
+				ctx,
+				network.levels[i],
+				left,
+				levelTop,
+				width,
+				levelHeight,
+        i === network.levels.length - 1 ? ["↑", "←", "→", "↓"] : []
+			);
+		}
 	}
 
 	private static getNodeX(
@@ -32,6 +53,7 @@ export class Visualizer {
 		top: number,
 		width: number,
 		height: number,
+    outputLabels: string[]
 	) {
 		const right = left + width;
 		const bottom = top + height;
@@ -72,6 +94,18 @@ export class Visualizer {
 			ctx.setLineDash([3, 3]);
 			ctx.stroke();
 			ctx.setLineDash([]);
+
+      if (outputLabels[i]) {
+        ctx.beginPath();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "black";
+        ctx.strokeStyle = "white";
+        ctx.font = (nodeRadius * 1) + "px Arial";
+        ctx.fillText(outputLabels[i], x, top);
+        ctx.lineWidth = 1;
+        ctx.strokeText(outputLabels[i], x, top);
+      }
 		}
 
 		for (let i = 0; i < inputs.length; i++) {

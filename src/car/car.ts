@@ -2,6 +2,7 @@ import { Controls } from "./controls";
 import { Sensor } from "./sensor";
 import { polysIntersect } from "../utils";
 import { NeuralNetwork } from "../network/network";
+const car = require("./car.png");
 
 export class Car {
 	x: number;
@@ -19,6 +20,8 @@ export class Car {
 	damaged: boolean = false;
 	brain: NeuralNetwork | null = null;
 	useBrain: boolean = false;
+	img: HTMLImageElement;
+	mask: HTMLCanvasElement;
 
 	constructor(
 		x: number,
@@ -27,6 +30,7 @@ export class Car {
 		height: number,
 		controlType: ControlType,
 		maxSpeed: number = 3,
+		color="blue"
 	) {
 		this.x = x;
 		this.y = y;
@@ -41,6 +45,25 @@ export class Car {
 			this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
 		}
 		this.controls = new Controls(controlType);
+
+		this.img = new Image();
+		this.img.src = car;
+
+		this.mask = document.createElement("canvas");
+		this.mask.width = width;
+		this.mask.height = height;
+
+		const maskCtx = this.mask.getContext("2d") as CanvasRenderingContext2D;
+		this.img.onload = () => {
+			maskCtx.fillStyle = color;
+			maskCtx.rect(0, 0, this.width, this.height);
+			maskCtx.fill();
+
+			maskCtx.globalCompositeOperation = "destination-atop";
+			maskCtx.drawImage(this.img, 0, 0, this.width, this.height);
+			maskCtx.globalCompositeOperation = "source-over";
+			this.mask = maskCtx.canvas;
+		}
 	}
 
 	private assessDamage(roadBorders: Borders, traffic: Car[]) {
@@ -83,29 +106,30 @@ export class Car {
 		return points;
 	}
 
-	draw(ctx: CanvasRenderingContext2D, color: string = "black") {
-		if (this.damaged) {
-			ctx.fillStyle = "gray";
-		} else {
-			ctx.fillStyle = color;
-		}
-		ctx.beginPath();
-		ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-		for (let i = 1; i < this.polygon.length; i++) {
-			ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-		}
-
-		ctx.fill();
-
-		if (this.sensor) {
+	draw(ctx: CanvasRenderingContext2D, drawSensor: boolean = false) {
+		if (this.sensor && drawSensor) {
 			this.sensor.draw(ctx);
 		}
+
+		ctx.save();
+		ctx.translate(this.x, this.y);
+		ctx.rotate(-this.angle);
+
+		if (!this.damaged) {
+			ctx.drawImage(this.mask, -this.width/2, -this.height/2, this.width, this.height);
+			ctx.globalCompositeOperation = "multiply";
+		}
+		ctx.drawImage(this.img, -this.width/2, -this.height/2, this.width, this.height);
+
+		ctx.restore();
 	}
 
 	update(roadBorders: Borders, traffic: Car[]) {
-		this.move();
-		this.polygon = this.createPolygon();
-		this.damaged = this.assessDamage(roadBorders, traffic);
+    if (!this.damaged) {
+		  this.move();
+		  this.polygon = this.createPolygon();
+		  this.damaged = this.assessDamage(roadBorders, traffic);
+    }  
 		if (this.sensor && this.brain) {
 			this.sensor.update(roadBorders, traffic);
 			const offsets = this.sensor.readings.map((s) =>
@@ -117,8 +141,8 @@ export class Car {
 			if (this.useBrain) {
 				this.controls.forward = !!outputs[0];
 				this.controls.left = !!outputs[1];
-				this.controls.right = !!outputs[1];
-				this.controls.reverse = !!outputs[1];
+				this.controls.right = !!outputs[2];
+				this.controls.reverse = !!outputs[3];
 			}
 		}
 	}
