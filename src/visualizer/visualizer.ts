@@ -20,7 +20,7 @@ export class Visualizer {
 					network.levels.length === 1 ? 0.5 : i / (network.levels.length - 1),
 				);
 
-      ctx.setLineDash([10, 3])
+			ctx.setLineDash([10, 3]);
 			Visualizer.drawLevel(
 				ctx,
 				network.levels[i],
@@ -28,7 +28,7 @@ export class Visualizer {
 				levelTop,
 				width,
 				levelHeight,
-        i === network.levels.length - 1 ? ["↑", "←", "→", "↓"] : []
+				i === network.levels.length - 1 ? ["↑", "←", "→", "↓"] : [],
 			);
 		}
 	}
@@ -53,7 +53,7 @@ export class Visualizer {
 		top: number,
 		width: number,
 		height: number,
-    outputLabels: string[]
+		outputLabels: string[],
 	) {
 		const right = left + width;
 		const bottom = top + height;
@@ -95,17 +95,17 @@ export class Visualizer {
 			ctx.stroke();
 			ctx.setLineDash([]);
 
-      if (outputLabels[i]) {
-        ctx.beginPath();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillStyle = "black";
-        ctx.strokeStyle = "white";
-        ctx.font = (nodeRadius * 1) + "px Arial";
-        ctx.fillText(outputLabels[i], x, top);
-        ctx.lineWidth = 1;
-        ctx.strokeText(outputLabels[i], x, top);
-      }
+			if (outputLabels[i]) {
+				ctx.beginPath();
+				ctx.textAlign = "center";
+				ctx.textBaseline = "middle";
+				ctx.fillStyle = "black";
+				ctx.strokeStyle = "white";
+				ctx.font = nodeRadius * 1 + "px Arial";
+				ctx.fillText(outputLabels[i], x, top);
+				ctx.lineWidth = 1;
+				ctx.strokeText(outputLabels[i], x, top);
+			}
 		}
 
 		for (let i = 0; i < inputs.length; i++) {

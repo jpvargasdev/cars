@@ -30,7 +30,7 @@ export class Car {
 		height: number,
 		controlType: ControlType,
 		maxSpeed: number = 3,
-		color="blue"
+		color = "blue",
 	) {
 		this.x = x;
 		this.y = y;
@@ -63,7 +63,7 @@ export class Car {
 			maskCtx.drawImage(this.img, 0, 0, this.width, this.height);
 			maskCtx.globalCompositeOperation = "source-over";
 			this.mask = maskCtx.canvas;
-		}
+		};
 	}
 
 	private assessDamage(roadBorders: Borders, traffic: Car[]) {
@@ -116,20 +116,32 @@ export class Car {
 		ctx.rotate(-this.angle);
 
 		if (!this.damaged) {
-			ctx.drawImage(this.mask, -this.width/2, -this.height/2, this.width, this.height);
+			ctx.drawImage(
+				this.mask,
+				-this.width / 2,
+				-this.height / 2,
+				this.width,
+				this.height,
+			);
 			ctx.globalCompositeOperation = "multiply";
 		}
-		ctx.drawImage(this.img, -this.width/2, -this.height/2, this.width, this.height);
+		ctx.drawImage(
+			this.img,
+			-this.width / 2,
+			-this.height / 2,
+			this.width,
+			this.height,
+		);
 
 		ctx.restore();
 	}
 
 	update(roadBorders: Borders, traffic: Car[]) {
-    if (!this.damaged) {
-		  this.move();
-		  this.polygon = this.createPolygon();
-		  this.damaged = this.assessDamage(roadBorders, traffic);
-    }  
+		if (!this.damaged) {
+			this.move();
+			this.polygon = this.createPolygon();
+			this.damaged = this.assessDamage(roadBorders, traffic);
+		}
 		if (this.sensor && this.brain) {
 			this.sensor.update(roadBorders, traffic);
 			const offsets = this.sensor.readings.map((s) =>
