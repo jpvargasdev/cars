@@ -9,10 +9,10 @@ export class Sensor {
 	rays: Rays;
 	readings: Readings;
 
-	constructor(car: Car) {
+	constructor(car: Car, rayCount: number = 5, rayLength: number = 150) {
 		this.car = car;
-		this.rayCount = 5;
-		this.rayLength = 150;
+		this.rayCount = rayCount;
+		this.rayLength = rayLength;
 		this.raySpread = Math.PI / 2;
 
 		this.rays = [];

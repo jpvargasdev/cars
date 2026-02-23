@@ -31,6 +31,9 @@ export class Car {
 		controlType: ControlType,
 		maxSpeed: number = 3,
 		color = "blue",
+		rayCount: number = 5,
+		rayLength: number = 150,
+		hiddenNeurons: number = 6,
 	) {
 		this.x = x;
 		this.y = y;
@@ -41,8 +44,8 @@ export class Car {
 		this.useBrain = controlType === "AI";
 
 		if (controlType !== "DUMMY") {
-			this.sensor = new Sensor(this);
-			this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);
+			this.sensor = new Sensor(this, rayCount, rayLength);
+			this.brain = new NeuralNetwork([this.sensor.rayCount, hiddenNeurons, 4]);
 		}
 		this.controls = new Controls(controlType);
 

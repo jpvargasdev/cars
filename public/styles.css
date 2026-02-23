@@ -31,3 +31,127 @@ button {
 button:hover {
   background: lightgray;
 }
+
+/* Settings Panel */
+#settings-panel {
+  position: fixed;
+  top: 0;
+  left: -280px;
+  width: 260px;
+  height: 100vh;
+  background: rgba(30, 30, 30, 0.95);
+  color: white;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  transition: left 0.3s ease;
+  z-index: 1000;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+}
+
+#settings-panel.open {
+  left: 0;
+}
+
+#settings-panel h3 {
+  margin: 0 0 15px 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #555;
+  font-size: 18px;
+}
+
+#settings-panel h4 {
+  margin: 15px 0 10px 0;
+  color: #aaa;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.settings-section {
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #444;
+}
+
+.settings-section:last-of-type {
+  border-bottom: none;
+}
+
+#settings-panel label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+#settings-panel input[type="number"] {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1px solid #555;
+  border-radius: 4px;
+  background: #222;
+  color: white;
+  font-size: 13px;
+}
+
+#settings-panel input[type="number"]:focus {
+  outline: none;
+  border-color: #4a9eff;
+}
+
+.settings-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.settings-buttons button {
+  padding: 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+}
+
+#apply-settings {
+  background: #4a9eff;
+  color: white;
+}
+
+#apply-settings:hover {
+  background: #3a8eef;
+}
+
+#reset-settings {
+  background: #555;
+  color: white;
+}
+
+#reset-settings:hover {
+  background: #666;
+}
+
+#toggle-settings {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 1001;
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  border-radius: 50%;
+  background: rgba(50, 50, 50, 0.9);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#toggle-settings:hover {
+  background: rgba(70, 70, 70, 0.9);
+}
