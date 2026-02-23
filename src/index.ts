@@ -30,9 +30,11 @@ const defaultSettings: Settings = {
 	rayLength: 150,
 };
 
+const STORAGE_KEY = "carSettings";
+
 // Load settings from localStorage or use defaults
 function loadSettings(): Settings {
-	const saved = localStorage.getItem("carSettings");
+	const saved = localStorage.getItem(STORAGE_KEY);
 	if (saved) {
 		return { ...defaultSettings, ...JSON.parse(saved) };
 	}
@@ -41,7 +43,19 @@ function loadSettings(): Settings {
 
 // Save settings to localStorage
 function saveSettings(settings: Settings): void {
-	localStorage.setItem("carSettings", JSON.stringify(settings));
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+	showSavedIndicator();
+}
+
+// Show saved indicator
+function showSavedIndicator(): void {
+	const indicator = document.getElementById("status-saved");
+	if (indicator) {
+		indicator.classList.add("show");
+		setTimeout(() => {
+			indicator.classList.remove("show");
+		}, 1500);
+	}
 }
 
 // Get settings from UI inputs
@@ -72,8 +86,33 @@ function applySettingsToUI(settings: Settings): void {
 	(document.getElementById("setting-ray-length") as HTMLInputElement).value = String(settings.rayLength);
 }
 
+// Setup auto-save on input change
+function setupAutoSave(): void {
+	const inputs = [
+		"setting-cars",
+		"setting-traffic",
+		"setting-lanes",
+		"setting-max-speed",
+		"setting-traffic-speed",
+		"setting-mutation",
+		"setting-hidden-neurons",
+		"setting-ray-count",
+		"setting-ray-length",
+	];
+
+	inputs.forEach((id) => {
+		const input = document.getElementById(id);
+		if (input) {
+			input.addEventListener("change", () => {
+				const newSettings = getSettingsFromUI();
+				saveSettings(newSettings);
+			});
+		}
+	});
+}
+
 // Load current settings
-let settings = loadSettings();
+const settings = loadSettings();
 
 // DOM Elements
 const saveCarButton = document.getElementById("save") as HTMLButtonElement;
@@ -82,7 +121,6 @@ const carCanvas = document.getElementById("car-canvas") as HTMLCanvasElement;
 const networkCanvas = document.getElementById("network-canvas") as HTMLCanvasElement;
 const settingsPanel = document.getElementById("settings-panel") as HTMLDivElement;
 const toggleSettingsBtn = document.getElementById("toggle-settings") as HTMLButtonElement;
-const applySettingsBtn = document.getElementById("apply-settings") as HTMLButtonElement;
 const resetSettingsBtn = document.getElementById("reset-settings") as HTMLButtonElement;
 
 if (!carCanvas || !networkCanvas) {
@@ -104,20 +142,17 @@ toggleSettingsBtn.addEventListener("click", () => {
 	settingsPanel.classList.toggle("open");
 });
 
-// Apply settings button
-applySettingsBtn.addEventListener("click", () => {
-	settings = getSettingsFromUI();
-	saveSettings(settings);
-	location.reload();
-});
-
-// Reset settings button
+// Reset settings button - saves defaults to localStorage
 resetSettingsBtn.addEventListener("click", () => {
 	applySettingsToUI(defaultSettings);
+	saveSettings(defaultSettings);
 });
 
 // Initialize UI with current settings
 applySettingsToUI(settings);
+
+// Setup auto-save
+setupAutoSave();
 
 // Save/Discard brain buttons
 function save() {
