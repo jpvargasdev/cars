@@ -111,165 +111,167 @@ function setupAutoSave(): void {
 	});
 }
 
-// Load current settings
-const settings = loadSettings();
+// Main initialization
+function init() {
+	// Load current settings
+	const settings = loadSettings();
 
-// DOM Elements
-const saveCarButton = document.getElementById("save") as HTMLButtonElement;
-const discardCarButton = document.getElementById("discard") as HTMLButtonElement;
-const carCanvas = document.getElementById("car-canvas") as HTMLCanvasElement;
-const networkCanvas = document.getElementById("network-canvas") as HTMLCanvasElement;
-const settingsPanel = document.getElementById("settings-panel") as HTMLDivElement;
-const toggleSettingsBtn = document.getElementById("toggle-settings") as HTMLButtonElement;
-const resetSettingsBtn = document.getElementById("reset-settings") as HTMLButtonElement;
+	// DOM Elements
+	const saveCarButton = document.getElementById("save") as HTMLButtonElement;
+	const discardCarButton = document.getElementById("discard") as HTMLButtonElement;
+	const carCanvas = document.getElementById("car-canvas") as HTMLCanvasElement;
+	const networkCanvas = document.getElementById("network-canvas") as HTMLCanvasElement;
+	const settingsPanel = document.getElementById("settings-panel") as HTMLDivElement;
+	const toggleSettingsBtn = document.getElementById("toggle-settings") as HTMLButtonElement;
+	const resetSettingsBtn = document.getElementById("reset-settings") as HTMLButtonElement;
 
-if (!carCanvas || !networkCanvas) {
-	throw new Error("Could not get canvas");
-}
-
-carCanvas.width = 200;
-networkCanvas.width = 400;
-
-const carCtx = carCanvas.getContext("2d");
-const networkCtx = networkCanvas.getContext("2d");
-
-if (!carCtx || !networkCtx) {
-	throw new Error("Could not get 2d context");
-}
-
-// Settings panel toggle
-toggleSettingsBtn.addEventListener("click", () => {
-	settingsPanel.classList.toggle("open");
-});
-
-// Reset settings button - saves defaults to localStorage
-resetSettingsBtn.addEventListener("click", () => {
-	applySettingsToUI(defaultSettings);
-	saveSettings(defaultSettings);
-});
-
-// Initialize UI with current settings
-applySettingsToUI(settings);
-
-// Setup auto-save
-setupAutoSave();
-
-// Save/Discard brain buttons
-function save() {
-	localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
-}
-
-function discard() {
-	localStorage.removeItem("bestBrain");
-}
-
-saveCarButton.addEventListener("click", save);
-discardCarButton.addEventListener("click", discard);
-
-// Initialize simulation with settings
-const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, settings.lanes);
-const traffic = generateRandomCars(settings.traffic, settings.lanes);
-
-function generateRandomCars(N: number, M: number) {
-	const trafficCars = [];
-	for (let i = 0; i < N; i++) {
-		const laneNumber = Math.floor(Math.random() * M);
-		const car = new Car(
-			road.getLaneCenter(laneNumber),
-			-150 * (i + 1),
-			30,
-			50,
-			"DUMMY",
-			settings.trafficSpeed,
-			getRandomColor(),
-		);
-		trafficCars.push(car);
+	if (!carCanvas || !networkCanvas) {
+		throw new Error("Could not get canvas");
 	}
-	return trafficCars;
-}
 
-function generateCars(N: number) {
-	const cars = [];
-	for (let i = 1; i <= N; i++) {
-		const car = new Car(
-			road.getLaneCenter(1),
-			100,
-			30,
-			50,
-			"AI",
-			settings.maxSpeed,
-			"blue",
-			settings.rayCount,
-			settings.rayLength,
-			settings.hiddenNeurons,
-		);
-		cars.push(car);
+	carCanvas.width = 200;
+	networkCanvas.width = 400;
+
+	const carCtx = carCanvas.getContext("2d") as CanvasRenderingContext2D;
+	const networkCtx = networkCanvas.getContext("2d") as CanvasRenderingContext2D;
+
+	if (!carCtx || !networkCtx) {
+		throw new Error("Could not get 2d context");
 	}
-	return cars;
-}
 
-const cars = generateCars(settings.cars);
-let bestCar = cars[0];
+	// Settings panel toggle
+	toggleSettingsBtn.addEventListener("click", () => {
+		settingsPanel.classList.toggle("open");
+	});
 
-if (localStorage.getItem("bestBrain")) {
-	for (let i = 0; i < cars.length; i++) {
-		cars[i].brain = JSON.parse(localStorage.getItem("bestBrain") as string);
-		if (i !== 0) {
-			NeuralNetwork.mutate(cars[i].brain!, settings.mutationRate);
+	// Reset settings button - saves defaults to localStorage
+	resetSettingsBtn.addEventListener("click", () => {
+		applySettingsToUI(defaultSettings);
+		saveSettings(defaultSettings);
+	});
+
+	// Initialize UI with current settings
+	applySettingsToUI(settings);
+
+	// Setup auto-save
+	setupAutoSave();
+
+	// Initialize simulation with settings
+	const road = new Road(carCanvas.width / 2, carCanvas.width * 0.9, settings.lanes);
+
+	function generateRandomCars(N: number, M: number) {
+		const trafficCars = [];
+		for (let i = 0; i < N; i++) {
+			const laneNumber = Math.floor(Math.random() * M);
+			const car = new Car(
+				road.getLaneCenter(laneNumber),
+				-150 * (i + 1),
+				30,
+				50,
+				"DUMMY",
+				settings.trafficSpeed,
+				getRandomColor(),
+			);
+			trafficCars.push(car);
+		}
+		return trafficCars;
+	}
+
+	function generateCars(N: number) {
+		const cars = [];
+		for (let i = 1; i <= N; i++) {
+			const car = new Car(
+				road.getLaneCenter(1),
+				100,
+				30,
+				50,
+				"AI",
+				settings.maxSpeed,
+				"blue",
+				settings.rayCount,
+				settings.rayLength,
+				settings.hiddenNeurons,
+			);
+			cars.push(car);
+		}
+		return cars;
+	}
+
+	const traffic = generateRandomCars(settings.traffic, settings.lanes);
+	const cars = generateCars(settings.cars);
+	let bestCar = cars[0];
+
+	// Save/Discard brain buttons
+	function save() {
+		localStorage.setItem("bestBrain", JSON.stringify(bestCar.brain));
+	}
+
+	function discard() {
+		localStorage.removeItem("bestBrain");
+	}
+
+	saveCarButton.addEventListener("click", save);
+	discardCarButton.addEventListener("click", discard);
+
+	if (localStorage.getItem("bestBrain")) {
+		for (let i = 0; i < cars.length; i++) {
+			cars[i].brain = JSON.parse(localStorage.getItem("bestBrain") as string);
+			if (i !== 0) {
+				NeuralNetwork.mutate(cars[i].brain!, settings.mutationRate);
+			}
 		}
 	}
+
+	function animate(time: number) {
+		for (let i = 0; i < traffic.length; i++) {
+			traffic[i].update(road.borders, []);
+		}
+
+		for (let i = 0; i < cars.length; i++) {
+			cars[i].update(road.borders, traffic);
+		}
+
+		bestCar =
+			cars.find((car) => car.y === Math.min(...cars.map((car) => car.y))) ||
+			cars[0];
+
+		carCanvas.height = window.innerHeight;
+		networkCanvas.height = window.innerHeight;
+
+		carCtx.save();
+		if (bestCar) {
+			carCtx.translate(0, -bestCar.y + carCanvas.height * 0.7);
+		}
+
+		road.draw(carCtx);
+		for (let i = 0; i < traffic.length; i++) {
+			traffic[i].draw(carCtx);
+		}
+
+		carCtx.globalAlpha = 0.2;
+		for (let i = 0; i < cars.length; i++) {
+			cars[i].draw(carCtx);
+		}
+		carCtx.globalAlpha = 1;
+		if (bestCar) {
+			bestCar.draw(carCtx, true);
+		}
+
+		carCtx.restore();
+
+		networkCtx.lineDashOffset = -time / 50;
+		if (bestCar) {
+			Visualizer.drawNetwork(networkCtx, bestCar.brain!);
+		}
+		requestAnimationFrame(animate);
+	}
+
+	animate(10);
 }
 
-function animate(time: number) {
-	if (!carCtx) {
-		throw new Error("Could not get 2d context");
-	}
-
-	if (!networkCtx) {
-		throw new Error("Could not get 2d context");
-	}
-
-	for (let i = 0; i < traffic.length; i++) {
-		traffic[i].update(road.borders, []);
-	}
-
-	for (let i = 0; i < cars.length; i++) {
-		cars[i].update(road.borders, traffic);
-	}
-
-	bestCar =
-		cars.find((car) => car.y === Math.min(...cars.map((car) => car.y))) ||
-		cars[0];
-
-	carCanvas.height = window.innerHeight;
-	networkCanvas.height = window.innerHeight;
-
-	carCtx.save();
-	if (bestCar) {
-		carCtx.translate(0, -bestCar.y + carCanvas.height * 0.7);
-	}
-
-	road.draw(carCtx);
-	for (let i = 0; i < traffic.length; i++) {
-		traffic[i].draw(carCtx);
-	}
-
-	carCtx.globalAlpha = 0.2;
-	for (let i = 0; i < cars.length; i++) {
-		cars[i].draw(carCtx);
-	}
-	carCtx.globalAlpha = 1;
-	if (bestCar) {
-		bestCar.draw(carCtx, true);
-	}
-
-	carCtx.restore();
-
-	networkCtx.lineDashOffset = -time / 50;
-	if (bestCar) {
-		Visualizer.drawNetwork(networkCtx, bestCar.brain!);
-	}
-	requestAnimationFrame(animate);
+// Wait for DOM to be ready
+if (document.readyState === "loading") {
+	document.addEventListener("DOMContentLoaded", init);
+} else {
+	init();
 }
-
-animate(10);
